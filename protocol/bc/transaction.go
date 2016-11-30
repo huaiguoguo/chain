@@ -42,6 +42,16 @@ func NewTx(data TxData) *Tx {
 	}
 }
 
+// NewTxFromBytes returns a new Tx containing data and its hash.
+func NewTxFromBytes(data []byte) (*Tx, error) {
+	txdata := TxData{}
+	err := txdata.readFrom(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	return NewTx(txdata), nil
+}
+
 // These flags are part of the wire protocol;
 // they must not change.
 const (

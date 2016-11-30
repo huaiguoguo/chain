@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc/metadata"
+
 	"chain/core/accesstoken"
 	"chain/errors"
 )
@@ -53,6 +55,21 @@ func (a *apiAuthn) auth(req *http.Request) error {
 		typ = "network"
 	}
 	return a.cachedAuthCheck(req.Context(), typ, user, pw)
+}
+
+func (a *apiAuthn) authRPC(ctx context.Context) error {
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		return errNotAuthenticated
+	}
+
+	var user, pw string
+	if len(md["username"]) > 0 && len(md["password"]) > 0 {
+		user = md["username"][0]
+		pw = md["password"][0]
+	}
+
+	return a.cachedAuthCheck(ctx, "network", user, pw)
 }
 
 func (a *apiAuthn) authCheck(ctx context.Context, typ, user, pw string) (bool, error) {

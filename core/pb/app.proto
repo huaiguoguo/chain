@@ -1,0 +1,288 @@
+syntax = "proto3";
+
+package pb;
+
+import "common.proto";
+
+service App {
+	rpc CreateAssets(CreateAssetsRequest) returns (CreateAssetsResponse) {}
+
+	rpc CreateAccounts(CreateAccountsRequest) returns (CreateAccountsResponse) {}
+	rpc createControlPrograms(CreateControlProgramsRequest) returns (CreateControlProgramsResponse) {}
+
+	rpc CreateTxFeed(CreateTxFeedRequest) returns (TxFeedResponse) {}
+	rpc GetTxFeed(GetTxFeedRequest) returns (TxFeedResponse) {}
+	rpc UpdateTxFeed(UpdateTxFeedRequest) returns (TxFeedResponse) {}
+	rpc DeleteTxFeed(DeleteTxFeedRequest) returns (ErrorResponse) {}
+
+	rpc CreateAccessToken(CreateAccessTokenRequest) returns (CreateAccessTokenResponse) {}
+	rpc ListAccessTokens(ListAccessTokensQuery) returns (ListAccessTokensResponse) {}
+	rpc DeleteAccessToken(DeleteAccessTokenRequest) returns (ErrorResponse) {}
+
+	rpc ListAssets(ListAssetsQuery) returns (ListAssetsResponse) {}
+	rpc ListAccounts(ListAccountsQuery) returns (ListAccountsResponse) {}
+	rpc ListBalances(ListBalancesQuery) returns (ListBalancesResponse) {}
+	rpc ListTxFeeds(ListTxFeedsQuery) returns (ListTxFeedsResponse) {}
+	rpc ListTxs(ListTxsQuery) returns (ListTxsResponse) {}
+	rpc ListUnspentOutputs(ListUnspentOutputsQuery) returns (ListUnspentOutputsResponse) {}
+}
+
+message Asset {
+	message Key {
+		bytes root_xpub = 1;
+		bytes asset_pubkey = 2;
+		repeated bytes asset_derivation_path = 3;
+	}
+	string id = 1;
+	string alias = 2;
+	bytes issuance_program = 3;
+	repeated Key keys = 4;
+	int32 quorum = 5;
+	bytes definition = 6;
+	bytes tags = 7;
+	bool is_local = 8;
+}
+
+message CreateAssetsRequest {
+	message Request {
+		string alias = 1;
+		repeated string root_xpubs = 2;
+		int32 quorum = 3;
+		bytes definition = 4;
+		bytes tags = 5;
+		string client_token = 6;
+	}
+	repeated Request requests = 1;
+}
+
+message CreateAssetsResponse {
+	message Response {
+		Asset asset = 1;
+		Error error = 9;
+	}
+	repeated Response responses = 1;
+	Error error = 9;
+}
+
+message Account {
+	message Key {
+		bytes root_xpub = 1;
+		bytes account_xpub = 2;
+		repeated bytes account_derivation_path = 3;
+	}
+	string id = 1;
+	string alias = 2;
+	repeated Key keys = 3;
+	int32 quorum = 4;
+	bytes tags = 5;
+}
+
+message CreateAccountsRequest {
+	message Request {
+		repeated string root_xpubs = 1;
+		int32 quorum = 2;
+		string alias = 3;
+		bytes tags = 4;
+		string client_token = 5;
+	}
+	repeated Request requests = 1;
+}
+
+message CreateAccountsResponse {
+	message Response {
+		Account account = 1;
+		Error error = 9;
+	}
+	repeated Response responses = 1;
+	Error error = 9;
+}
+
+message CreateControlProgramsRequest {
+	message Account {
+		oneof identifier {
+			string account_id = 1;
+			string account_alias = 2;
+		}
+	}
+	message Request {
+		oneof type {
+			Account account = 1;
+		}
+	}
+	repeated Request requests = 1;
+}
+
+message CreateControlProgramsResponse {
+	message Response {
+		bytes control_program = 1;
+		Error error = 9;
+	}
+	repeated Response responses = 1;
+	Error error = 9;
+}
+
+message TxFeed {
+	string id = 1;
+	string alias = 2;
+	string filter = 3;
+	string after = 4;
+}
+
+message TxFeedResponse {
+	TxFeed response = 1;
+	Error error = 9;
+}
+
+message CreateTxFeedRequest {
+	string alias = 1;
+	string filter = 2;
+	string client_token = 3;
+}
+
+message GetTxFeedRequest {
+	oneof identifier {
+		string id = 1;
+		string alias = 2;
+	}
+}
+
+message UpdateTxFeedRequest {
+	oneof identifier {
+		string id = 1;
+		string alias = 2;
+	}
+	string previous_after = 3;
+	string after = 4;
+}
+
+message DeleteTxFeedRequest {
+	oneof identifier {
+		string id = 1;
+		string alias = 2;
+	}
+}
+
+message CreateAccessTokenRequest {
+	string id = 1;
+	string type = 2;
+}
+
+message CreateAccessTokenResponse {
+	AccessToken token = 1;
+	Error error = 9;
+}
+
+message ListAccessTokensQuery {
+	string type = 1;
+	int32 page_size = 2;
+	string after = 3;
+}
+
+message ListAccessTokensResponse {
+	repeated AccessToken items = 1;
+	bool last_page = 2;
+	ListAccessTokensQuery next = 3;
+	Error error = 9;
+}
+
+message DeleteAccessTokenRequest {
+	string id = 1;
+}
+
+message AccessToken {
+	string id = 1;
+	string token = 2;
+	string type = 3;
+	string created_at = 4;
+}
+
+message FilterParam {
+	oneof value {
+		string string = 1;
+		int64 int64 = 2;
+		bytes bytes = 3;
+		bool bool = 4;
+	}
+}
+
+message ListAccountsQuery {
+	string filter = 1;
+	repeated FilterParam filter_params = 2;
+	string after = 3;
+}
+
+message ListAccountsResponse {
+	bytes items = 1;
+	bool last_page = 2;
+	ListAccountsQuery next = 3;
+	Error error = 9;
+}
+
+message ListAssetsQuery {
+	string filter = 1;
+	repeated FilterParam filter_params = 2;
+	string after = 3;
+}
+
+message ListAssetsResponse {
+	bytes items = 1;
+	bool last_page = 2;
+	ListAssetsQuery next = 3;
+	Error error = 9;
+}
+
+message ListBalancesQuery {
+	string filter = 1;
+	repeated FilterParam filter_params = 2;
+	repeated string sum_by = 3;
+	uint64 timestamp = 4;
+}
+
+message ListBalancesResponse {
+	bytes items = 1;
+	bool last_page = 2;
+	ListBalancesQuery next = 3;
+	Error error = 9;
+}
+
+message ListTxFeedsQuery {
+	string after = 1;
+}
+
+message ListTxFeedsResponse {
+	repeated TxFeed items = 1;
+	bool last_page = 2;
+	ListTxFeedsQuery next = 3;
+	Error error = 9;
+}
+
+message ListTxsQuery {
+	string filter = 1;
+	repeated FilterParam filter_params = 2;
+	bool ascending_with_long_poll = 3;
+	string timeout = 4;
+	uint64 start_time = 5;
+	uint64 end_time = 6;
+	string after = 7;
+}
+
+message ListTxsResponse {
+	bytes items = 1;
+	bool last_page = 2;
+	ListTxsQuery next = 3;
+	Error error = 9;
+}
+
+message ListUnspentOutputsQuery {
+	string filter = 1;
+	repeated FilterParam filter_params = 2;
+	string after = 3;
+	uint64 timestamp = 4;
+}
+
+message ListUnspentOutputsResponse {
+	bytes items = 1;
+	bool last_page = 2;
+	ListUnspentOutputsQuery next = 3;
+	Error error = 9;
+}

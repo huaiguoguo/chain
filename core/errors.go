@@ -9,6 +9,7 @@ import (
 	"chain/core/blocksigner"
 	"chain/core/config"
 	"chain/core/mockhsm"
+	"chain/core/pb"
 	"chain/core/query"
 	"chain/core/query/filter"
 	"chain/core/rpc"
@@ -176,4 +177,13 @@ func errInfoBodyList(errs []error) (a []detailedError) {
 		a = append(a, body)
 	}
 	return a
+}
+
+func protobufErr(err detailedError) *pb.Error {
+	return &pb.Error{
+		Code:      err.ChainCode,
+		Message:   err.Message,
+		Detail:    err.Detail,
+		Temporary: err.Temporary,
+	}
 }

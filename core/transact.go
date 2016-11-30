@@ -88,7 +88,7 @@ func (h *Handler) build(ctx context.Context, buildReqs []*buildRequest) (interfa
 		go func(i int) {
 			subctx := reqid.NewSubContext(ctx, reqid.New())
 			defer wg.Done()
-			defer batchRecover(subctx, &responses[i])
+			defer batchRecover(batchAssigner(subctx, &responses[i]))
 
 			tmpl, err := h.buildSingle(subctx, buildReqs[i])
 			if err != nil {
@@ -290,7 +290,7 @@ func (h *Handler) submit(ctx context.Context, x submitArg) (interface{}, error) 
 		go func(i int) {
 			subctx := reqid.NewSubContext(ctx, reqid.New())
 			defer wg.Done()
-			defer batchRecover(subctx, &responses[i])
+			defer batchRecover(batchAssigner(subctx, &responses[i]))
 
 			tx, err := h.submitSingle(subctx, &x.Transactions[i], x.WaitUntil)
 			if err != nil {
